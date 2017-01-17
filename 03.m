@@ -45,7 +45,7 @@ r = rank (A);
 xi = u(:, 1:r)' * A;
 
 #
-e0 = 10;
+e0 = 2;
 
 ei = zeros (1, N);
 
