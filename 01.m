@@ -14,7 +14,15 @@ function next_day = forecast (n, today)
 endfunction
 
 # Part A
-n = 1
+display ("Part A, Forecasting tomorrow (n = 1):");
+n = 1;
 today = [0 1 0];
-tomorrow = forecast(n, today);
-display(tomorrow);
+tomorrow = forecast (n, today);
+display (tomorrow);
+
+# Part B
+display ("Part B, Forecasting future (n = 1372):");
+n = 1372;
+today = [0 1 0];
+future = forecast (n, today);
+display (future);
