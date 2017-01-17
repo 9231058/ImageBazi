@@ -44,7 +44,7 @@ r = rank (A);
 # x = [u_1, u_2, ..., u_r]' * (f - f_bar)
 xi = u(:, 1:r)' * A;
 
-#
+# Predefined threshold
 e0 = 2;
 
 ei = zeros (1, N);
