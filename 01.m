@@ -26,3 +26,10 @@ n = 1372;
 today = [0 1 0];
 future = forecast (n, today);
 display (future);
+
+# Part C
+display ("Part C, General markov model under test !");
+n = 1;
+current_state = [1, 2];
+transition = [1, 2; 1, 2];
+display (general_markov (current_state, transition, n));
