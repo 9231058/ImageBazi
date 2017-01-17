@@ -1,5 +1,7 @@
 pkg load image
 
+clear
+
 im_path = input("Please enter image path: ", "s");
 
 im_source = imread(im_path);
