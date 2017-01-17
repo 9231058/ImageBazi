@@ -2,7 +2,7 @@
 ## Introduction
 Solution to matlab problems of Dr.AmirMazlaghani final project of Engineering Mathematics course.
 
-## Part one
+## Question one
 We want to forecast weather with markov model, Assume we have following table for weather:
 
 | Tomorrow / Today | Sunny | Cloudy | Rainy |
