@@ -14,4 +14,8 @@ We want to forecast weather with markov model, Assume we have following table fo
 and then we create some awsome code in [01.m](01.m).
 
 ## Question Two
-Let's compress our image with SVD.
+Let's compress our image with SVD. Please install octave image package before use this awesome code.
+
+```sh
+sudo apt install octave-image
+```
