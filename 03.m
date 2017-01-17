@@ -2,101 +2,68 @@ pkg load image
 
 clear
 
-function image = read_image (address):
-	im = imread(address);
+function image = read_image (address)
+	im = imread (address);
 	im = imresize(im, 0.25);
 	im = rgb2gray(im);
-	im = im2double(im);
+	image = im2double(im);
 endfunction
 
-dataset = 'dataset';
+training_set = 'training_set';
 
-im_path = input ("Please enter source image path", "s");
+im_path = input ("Please enter source image path ", "s");
 im_source = read_image (im_path);
 
-M  = size(inImage(), 1) * size(inImage(), 2);
-N = 240;
-A = zeros(M, N);
+# Assume each face image has m * n = M pixels
+M  = size (im_source, 1) * size (im_source, 2);
 
-dataset_pics = [4 5 6 7 11 13];
-dataset_pics_len = size(dataset_pics, 2);
+# N = training set size
+N = 2;
 
-for i = 1:(N/numOfPics)
-    for j = Pics;
-        f = read_image(sprintf('%s/%d-%02d.jpg', dataset, i, j));
-        A(:, i) = f(:);
-    end
-end
+# S = training set
+# S = [f_1, f_2, ..., f_N]
+S = zeros (M, N);
 
-%% 2. Normalize
-meanOfA = mean(A, 2);
-A = A - meanOfA(:, ones(1, N));
+for i = 1:N
+	f = read_image (sprintf ('%s/%02d.jpg', training_set, i));
+        S(:, i) = f(:);
+endfor
 
-%% 3. SVD
-[u, s, v] = svd(A);
-R = size(s, 2);
+S_bar = mean (S, 2);
+A = S - S_bar;
 
-%% 4. Coordinate x_i
-xi = u(:, 1:(N/numOfPics))' * A;
+# SVD
+[u, s, v] = svd (A);
 
-%% 5. Choose threshold
-e0 = 180;
-e1 = 9;
+# Assume the rank of A is r <= N << M.
+r = rank (A);
 
-%% 6. Projection
-numOfTest = 50;
-ef = zeros(1, numOfTest);
-ei = zeros(N/(numOfPics), numOfTest);
-class = -1 * ones(1, numOfTest);
-for i = 1:numOfTest
-    f = ReadImage(sprintf('Dataset/%d-12.jpg', i));
-    f = f(:) - meanOfA;
-    x = u(:, 1:(N/numOfPics))' * f;
+# It can be proved that {u_1, u_2, ... u_r} form an
+# orthonormal basis for R(A), the range (column) subspace
+# of matrix A.
+# x = [u_1, u_2, ..., u_r]' * (f - f_bar)
+xi = u(:, 1:r)' * A;
 
-    tmp = f - u(:, 1:(N/numOfPics)) * x;
-    ef(i) = (tmp' * tmp) ^ .5;
+#
+e0 = 10;
 
-    %% 7. Classify
-    if ef(i) < e1
-        for j = 1:N
-            tmp = xi(:, j) - x;
-            ei(j, i) = tmp' * tmp;
-        end
+ei = zeros (1, N);
 
-        if min(ei(:, i)) < e0
-            [m, class(i)] = min(ei(:, i));
-        end
-    end
-end
-plot(ef, '-o')
+# Facial Recognition
 
-%% Summary of result
-itsnc = sum(class(1:(N/numOfPics)) == -1);
-itstc = sum(class(1:(N/numOfPics)) == 1:(N/numOfPics));
-itsfc = sum(not(class(1:(N/numOfPics)) == 1:(N/numOfPics))) - itsnc;
-itsa = (itstc) / (itsnc + itstc + itsfc) * 100;
-otsnc = sum(class((N/numOfPics + 1):(numOfTest)) == -1);
-otsfc = sum(not(class((N/numOfPics + 1):(numOfTest)) == -1));
-otsa = (otsnc) / (otsnc + otsfc) * 100;
+# Coordinate vector x is used to find which of the training
+# faces best describes the face f.
 
-tp = itstc;
-fp = itsfc + otsfc;
-fn = itsnc;
-tn = otsnc;
-precision = tp / (tp + fp);
-recall = tp / (tp + fn);
-f1 = 2 * precision * recall / (precision + recall);
+x = u(:, 1:r)' * (im_source(:) - S_bar);
 
-display('Result:')
-display(sprintf('\tPictures from people in training set:'))
-display(sprintf('\t\tNot Classified: %d', itsnc))
-display(sprintf('\t\tTrue Classified: %d', itstc))
-display(sprintf('\t\tFalse Classified: %d', itsfc))
-display(sprintf('\t\tAccuracy: %2.1f%%', itsa))
-display(sprintf('\tPictures from people not in training set:'))
-display(sprintf('\t\tNot Classified: %d', otsnc))
-display(sprintf('\t\tFalse Classified: %d', otsfc))
-display(sprintf('\t\tAccuracy: %2.1f%%', otsa))
-display(sprintf('\tPrecision: %2.1f%%', precision * 100))
-display(sprintf('\tRecall: %2.1f%%', recall * 100))
-display(sprintf('\tF1 Score: %2.1f%%', f1 * 100))
+for i = 1:N
+	ei(i) = ((x - xi(:, i))' * (x - xi(:, i))) ^ 0.5;
+endfor
+
+display (ei);
+	
+if min (ei) < e0
+	display ("We find you in our training set");
+else
+	display ("We can not find you in our training set");
+endif
